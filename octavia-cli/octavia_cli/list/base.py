@@ -2,16 +2,10 @@
 # Copyright (c) 2021 Airbyte, Inc., all rights reserved.
 #
 import abc
-from enum import Enum
 from typing import Callable, List
 
 import airbyte_api_client
 import octavia_cli.list.formatting as formatting
-
-
-class DefinitionType(Enum):
-    SOURCE = "source"
-    DESTINATION = "destination"
 
 
 class BaseListing(abc.ABC):

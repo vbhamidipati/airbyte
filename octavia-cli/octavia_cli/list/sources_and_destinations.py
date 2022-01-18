@@ -7,7 +7,7 @@ from typing import Callable
 import airbyte_api_client
 from airbyte_api_client.api import destination_api, source_api
 
-from .base import BaseListing, DefinitionType
+from .base import BaseListing
 
 
 class SourcesAndDestinations(BaseListing):
@@ -21,7 +21,6 @@ class SourcesAndDestinations(BaseListing):
 
 
 class Sources(SourcesAndDestinations):
-    definition_type = DefinitionType.SOURCE
     api = source_api.SourceApi
     list_field_in_response = "sources"
     fields_to_display = ["name", "sourceName", "sourceId"]
@@ -31,7 +30,6 @@ class Sources(SourcesAndDestinations):
 
 
 class Destinations(SourcesAndDestinations):
-    definition_type = DefinitionType.DESTINATION
     api = destination_api.DestinationApi
     list_field_in_response = "destinations"
     fields_to_display = ["name", "destinationName", "destinationId"]
