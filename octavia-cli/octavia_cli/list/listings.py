@@ -8,6 +8,7 @@ from typing import List
 import airbyte_api_client
 import octavia_cli.list.formatting as formatting
 from airbyte_api_client.api import (
+    connection_api,
     destination_api,
     destination_definition_api,
     source_api,
@@ -85,7 +86,7 @@ class DestinationConnectorsDefinitions(BaseListing):
     list_function_name = "list_latest_destination_definitions"
 
 
-class SourcesAndDestinations(BaseListing, abc.ABC):
+class WorkspaceListing(BaseListing, abc.ABC):
     def __init__(self, api_client: airbyte_api_client.ApiClient, workspace_id: str):
         self.workspace_id = workspace_id
         super().__init__(api_client)
@@ -95,15 +96,22 @@ class SourcesAndDestinations(BaseListing, abc.ABC):
         return {"workspace_id_request_body": WorkspaceIdRequestBody(workspace_id=self.workspace_id)}
 
 
-class Sources(SourcesAndDestinations):
+class Sources(WorkspaceListing):
     api = source_api.SourceApi
     fields_to_display = ["name", "sourceName", "sourceId"]
     list_field_in_response = "sources"
     list_function_name = "list_sources_for_workspace"
 
 
-class Destinations(SourcesAndDestinations):
+class Destinations(WorkspaceListing):
     api = destination_api.DestinationApi
     fields_to_display = ["name", "destinationName", "destinationId"]
     list_field_in_response = "destinations"
     list_function_name = "list_destinations_for_workspace"
+
+
+class Connections(WorkspaceListing):
+    api = connection_api.ConnectionApi
+    fields_to_display = ["name", "connectionId", "status", "sourceId", "destinationId"]
+    list_field_in_response = "connections"
+    list_function_name = "list_connections_for_workspace"

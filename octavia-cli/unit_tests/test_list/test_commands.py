@@ -7,7 +7,7 @@ from octavia_cli.list import commands
 
 
 def test_available_commands():
-    assert commands.AVAILABLE_COMMANDS == [commands.connectors, commands.sources, commands.destinations]
+    assert commands.AVAILABLE_COMMANDS == [commands.connectors, commands.sources, commands.destinations, commands.connections]
 
 
 def test_commands_in_list_group():
@@ -50,3 +50,12 @@ def test_destinations(mocker):
     result = runner.invoke((commands.destinations), obj=context_object)
     commands.Destinations.assert_called_with(context_object["API_CLIENT"], context_object["WORKSPACE_ID"])
     assert result.output == "DestinationsRepr\n"
+
+
+def test_connections(mocker):
+    mocker.patch.object(commands, "Connections", mocker.Mock(return_value="ConnectionsRepr"))
+    context_object = {"API_CLIENT": mocker.Mock(), "WORKSPACE_ID": "my_workspace_id"}
+    runner = CliRunner()
+    result = runner.invoke((commands.connections), obj=context_object)
+    commands.Connections.assert_called_with(context_object["API_CLIENT"], context_object["WORKSPACE_ID"])
+    assert result.output == "ConnectionsRepr\n"

@@ -4,6 +4,7 @@
 
 import pytest
 from airbyte_api_client.api import (
+    connection_api,
     destination_api,
     destination_definition_api,
     source_api,
@@ -12,11 +13,12 @@ from airbyte_api_client.api import (
 from octavia_cli.list import listings
 from octavia_cli.list.listings import (
     BaseListing,
+    Connections,
     DestinationConnectorsDefinitions,
     Destinations,
     SourceConnectorsDefinitions,
     Sources,
-    SourcesAndDestinations,
+    WorkspaceListing,
 )
 
 
@@ -110,18 +112,18 @@ class TestDestinationConnectorsDefinitions:
         assert destination_connectors_definition.list_function_name == "list_latest_destination_definitions"
 
 
-class TestSourcesAndDestinations:
+class TestWorkspaceListing:
     @pytest.fixture
     def patch_base_class(self, mocker):
         # Mock abstract methods to enable instantiating abstract class
-        mocker.patch.object(SourcesAndDestinations, "__abstractmethods__", set())
-        mocker.patch.object(SourcesAndDestinations, "api", mocker.Mock())
+        mocker.patch.object(WorkspaceListing, "__abstractmethods__", set())
+        mocker.patch.object(WorkspaceListing, "api", mocker.Mock())
 
     def test_init(self, patch_base_class, mocker, mock_api_client):
         mocker.patch.object(listings, "WorkspaceIdRequestBody")
         mocker.patch.object(BaseListing, "__init__")
-        assert SourcesAndDestinations.__base__ == BaseListing
-        sources_and_destinations = SourcesAndDestinations(mock_api_client, "my_workspace_id")
+        assert WorkspaceListing.__base__ == BaseListing
+        sources_and_destinations = WorkspaceListing(mock_api_client, "my_workspace_id")
 
         assert sources_and_destinations.workspace_id == "my_workspace_id"
         assert sources_and_destinations.list_function_kwargs == {"workspace_id_request_body": listings.WorkspaceIdRequestBody.return_value}
@@ -130,12 +132,12 @@ class TestSourcesAndDestinations:
 
     def test_abstract(self, mock_api_client):
         with pytest.raises(TypeError):
-            SourcesAndDestinations(mock_api_client)
+            WorkspaceListing(mock_api_client)
 
 
 class TestSources:
     def test_init(self, mock_api_client):
-        assert Sources.__base__ == SourcesAndDestinations
+        assert Sources.__base__ == WorkspaceListing
         sources = Sources(mock_api_client, "my_workspace_id")
         assert sources.api == source_api.SourceApi
         assert sources.fields_to_display == ["name", "sourceName", "sourceId"]
@@ -145,9 +147,19 @@ class TestSources:
 
 class TestDestinations:
     def test_init(self, mock_api_client):
-        assert Destinations.__base__ == SourcesAndDestinations
+        assert Destinations.__base__ == WorkspaceListing
         destinations = Destinations(mock_api_client, "my_workspace_id")
         assert destinations.api == destination_api.DestinationApi
         assert destinations.fields_to_display == ["name", "destinationName", "destinationId"]
         assert destinations.list_field_in_response == "destinations"
         assert destinations.list_function_name == "list_destinations_for_workspace"
+
+
+class TestConnections:
+    def test_init(self, mock_api_client):
+        assert Connections.__base__ == WorkspaceListing
+        connections = Connections(mock_api_client, "my_workspace_id")
+        assert connections.api == connection_api.ConnectionApi
+        assert connections.fields_to_display == ["name", "connectionId", "status", "sourceId", "destinationId"]
+        assert connections.list_field_in_response == "connections"
+        assert connections.list_function_name == "list_connections_for_workspace"

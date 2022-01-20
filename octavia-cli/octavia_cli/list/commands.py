@@ -7,6 +7,7 @@ from typing import List
 import click
 
 from .listings import (
+    Connections,
     DestinationConnectorsDefinitions,
     Destinations,
     SourceConnectorsDefinitions,
@@ -60,7 +61,16 @@ def destinations(ctx: click.Context):
     click.echo(destinations)
 
 
-AVAILABLE_COMMANDS: List[click.Command] = [connectors, sources, destinations]
+@click.command(help="List existing connections.")
+@click.pass_context
+def connections(ctx: click.Context):
+    api_client = ctx.obj["API_CLIENT"]
+    workspace_id = ctx.obj["WORKSPACE_ID"]
+    connections = Connections(api_client, workspace_id)
+    click.echo(connections)
+
+
+AVAILABLE_COMMANDS: List[click.Command] = [connectors, sources, destinations, connections]
 
 
 def add_commands_to_list():
